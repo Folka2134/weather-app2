@@ -18,8 +18,9 @@ const App = () => {
   const [humidity, setHumidity] = useState(null);
   const [wind, setWind] = useState(null);
   const [image, setImage] = useState(null);
+  const [notFound, setNotFound] = useState(null);
 
-  const APIKey = "728b0ee6df5687559812bd3169ad77b7";
+  const APIKey = "f6b39355d32df8d5b4bb9916251c1611";
 
   function handleChange(event) {
     setCity(event.target.value);
@@ -33,18 +34,19 @@ const App = () => {
 
   async function getWeather() {
     const result = await fetch(
-      `http://api.openweathermap.org/data/2.5/weather?q=${city},uk&APPID=f6b39355d32df8d5b4bb9916251c1611`
+      `http://api.openweathermap.org/data/2.5/weather?q=${city},uk&APPID=${APIKey}`
     );
     result.json().then((json) => {
       console.log(json);
       if (json.cod === "404") {
-        console.log(json.message);
+        setNotFound(true);
       } else {
         setDescription(json.weather[0].description);
         setTemperature(json.main.temp);
         setHumidity(json.main.humidity);
         setWind(json.wind.speed);
         setData(true);
+        setNotFound(false);
 
         switch (json.weather[0].main) {
           case "Clear":
@@ -80,7 +82,7 @@ const App = () => {
         // className={`container${isContainerActive ? " right-panel-active" : ""}`}
         className={`container relative w-[400px] bg-white p-4 overflow-hidden rounded-xl ease-out duration-75 ${
           data ? "h-[590px]" : "h-[105px]"
-        } `}
+        } ${notFound && "h-[450px]"} `}
       >
         <div className="search-box flex items-center justify-between w-full h-min p-5 bg-white rounded-lg">
           <i className="fa-solid fa-location-dot "></i>
@@ -97,41 +99,51 @@ const App = () => {
           ></button>
         </div>
 
-        <div className="hidden not-found w-full text-center mt-12 scale-0 opacity-0">
-          <img className="w-[70%]" src={notfound} alt="404" />
-          <p className="text-[#06283D] text-md font-semibold mt-3"></p>
-        </div>
+        {notFound ? (
+          <div className="not-found flex flex-col items-center w-full text-center mt-12 ">
+            <img className=" w-[80%]" src={notfound} alt="404" />
+            <p className="text-[#06283D] text-md font-semibold mt-3">
+              <p>Oops! Invalid location</p>
+            </p>
+          </div>
+        ) : (
+          <div>
+            <div className="weather-box flex flex-col items-center text-center">
+              <img className="w-[60%] mt-8" src={image} />
+              <p className="temperature relative w-full text-[#06283D] text-sm font-bold mt-8 ">
+                <span className="text-center w-full text-[1.5rem]">
+                  {temperature}°C
+                </span>
+              </p>
+              <p className="description text-[#06283D] text-lg font-semibold capitalize">
+                {description}
+              </p>
+            </div>
 
-        <div className="weather-box flex flex-col items-center text-center ">
-          <img className="w-[60%] mt-8" src={image} />
-          <p className="temperature relative text-[#06283D] text-sm font-bold mt-8 ml-4">
-            <span className=" text-sm">{temperature}°C</span>
-          </p>
-          <p className="description text-[#06283D] text-lg font-semibold capitalize">
-            {description}
-          </p>
-        </div>
-
-        <div
-          className={`weather-details flex w-full h-[100px] items-center ${
-            data ? "fadeIn" : ""
-          }`}
-        >
-          <div className="humidity flex items-center w-[50%] h-[100px] p-6 justify-start">
-            <i className="fa-solid fa-water px-2"></i>
-            <div>
-              <span className="text-[#06283D] text-lg font">{humidity}</span>
-              <p>Humidity</p>
+            <div
+              className={`weather-details flex w-full h-[100px] items-center ${
+                data ? "fadeIn" : ""
+              }`}
+            >
+              <div className="humidity flex items-center w-[50%] h-[100px] p-6 justify-start">
+                <i className="fa-solid fa-water px-2"></i>
+                <div>
+                  <span className="text-[#06283D] text-lg font">
+                    {humidity}
+                  </span>
+                  <p>Humidity</p>
+                </div>
+              </div>
+              <div className="wind flex items-center w-[50%] h-[100px] p-6 justify-end">
+                <i className="fa-solid fa-wind px-2"></i>
+                <div>
+                  <span>{wind}</span>
+                  <p>Wind Speed</p>
+                </div>
+              </div>
             </div>
           </div>
-          <div className="wind flex items-center w-[50%] h-[100px] p-6 justify-end">
-            <i className="fa-solid fa-wind px-2"></i>
-            <div>
-              <span>{wind}</span>
-              <p>Wind Speed</p>
-            </div>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
