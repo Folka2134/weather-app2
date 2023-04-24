@@ -1,32 +1,61 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+
 import notfound from "./assets/images/404.png";
 
 const App = () => {
-  const [city, setCity] = useState("brighton");
+  const [city, setCity] = useState("Brighton");
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState(null);
 
   const APIKey = "728b0ee6df5687559812bd3169ad77b7";
 
-  const getWeather = async () => {
-    const res = await fetch(
-      // `https://api.openweathermap.org/data/2,5/weather?q=${city}&units-metric^appid=${APIKey}`
-      `http://api.openweathermap.org/data/2.5/weather?q=${city},uk&APPID=f6b39355d32df8d5b4bb9916251c1611`
-    );
+  useEffect(() => {
+    getWeather();
+  }, []);
 
-    const data = await res.json();
-    console.log(data);
+  async function getWeather() {
+    await axios(
+      `http://api.openweathermap.org/data/2.5/weather?q=${city},uk&APPID=f6b39355d32df8d5b4bb9916251c1611`
+    )
+      .then((response) => {
+        setData(response.data);
+        console.log(data);
+      })
+      .catch((error) => {
+        console.error("Error fetching");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }
+  function handleChange(event) {
+    setCity(event.target.value);
+  }
+
+  const handleKeypress = (e) => {
+    // it triggers by pressing the enter key
+    if (e.keyCode === 13) {
+      getWeather();
+    }
   };
 
   return (
     <div className="bg-gray-400 min-h-screen flex flex-col justify-center items-center">
       <div className="relative w-[400px] h-[105px] bg-white p-4 overflow-hidden rounded-xl ease-out duration-75">
         <div className="search-box flex items-center justify-between w-full h-min bg-white p-4 rounded-lg">
-          <i className="fa-solid fa-location-dot absolute"></i>
+          <i className="fa-solid fa-location-dot "></i>
           <input
-            className="mx-3 bg-[#06283D] w-[80%] text-lg font-semibold uppercase pl-8 rounded-full"
+            className="bg-gray-200 w-[80%] text-lg font-semibold uppercase pl-8 rounded-full"
             type="text"
             placeholder="Enter Your Location"
+            onChange={handleChange}
+            onKeyDown={handleKeypress}
           />
-          <button className="fa-solid fa-magnifying-glass bg-gray-300 hover:bg-[#06283D] hover:text-white p-2 rounded-full transition-colors ease-linear duration-150"></button>
+          <button
+            onClick={getWeather}
+            className="fa-solid fa-magnifying-glass bg-gray-300 hover:bg-[#06283D] hover:text-white p-2 rounded-full transition-colors ease-linear duration-150"
+          ></button>
         </div>
 
         <div className="not-found">
